@@ -1,13 +1,9 @@
-import { getGlobalNotionData } from '@/lib/notion/getNotionData'
-import { Suspense, useEffect, useState } from 'react'
+import { getGlobalData } from '@/lib/notion/getNotionData'
 import { useGlobal } from '@/lib/global'
 import BLOG from '@/blog.config'
-import dynamic from 'next/dynamic'
-import Loading from '@/components/Loading'
-/**
- * 默认主题
- */
-const DefaultLayout = dynamic(() => import(`@/themes/${BLOG.THEME}/LayoutTagIndex`), { ssr: true })
+import { useRouter } from 'next/router'
+import { getLayoutByTheme } from '@/themes/theme'
+import { siteConfig } from '@/lib/config'
 
 /**
  * 标签首页
@@ -17,33 +13,25 @@ const DefaultLayout = dynamic(() => import(`@/themes/${BLOG.THEME}/LayoutTagInde
 const TagIndex = props => {
   const { locale } = useGlobal()
   const { siteInfo } = props
-  const { theme } = useGlobal()
-  const [Layout, setLayout] = useState(DefaultLayout)
-  // 切换主题
-  useEffect(() => {
-    const loadLayout = async () => {
-      setLayout(dynamic(() => import(`@/themes/${theme}/LayoutTagIndex`)))
-    }
-    loadLayout()
-  }, [theme])
+
+  // 根据页面路径加载不同Layout文件
+  const Layout = getLayoutByTheme({ theme: siteConfig('THEME'), router: useRouter() })
 
   const meta = {
-    title: `${locale.COMMON.TAGS} | ${siteInfo?.title}`,
-    description: siteInfo?.description,
+    title: `${locale.COMMON.TAGS} | ${siteConfig('TITLE')}`,
+    description: siteConfig('DESCRIPTION'),
     image: siteInfo?.pageCover,
     slug: 'tag',
     type: 'website'
   }
   props = { ...props, meta }
 
-  return <Suspense fallback={<Loading/>}>
-    <Layout {...props} />
-  </Suspense>
+  return <Layout {...props} />
 }
 
 export async function getStaticProps() {
   const from = 'tag-index-props'
-  const props = await getGlobalNotionData({ from })
+  const props = await getGlobalData({ from })
   delete props.allPages
   return {
     props,

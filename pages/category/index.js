@@ -1,15 +1,10 @@
-import { getGlobalNotionData } from '@/lib/notion/getNotionData'
-import React, { Suspense, useEffect, useState } from 'react'
+import { getGlobalData } from '@/lib/notion/getNotionData'
+import React from 'react'
 import { useGlobal } from '@/lib/global'
-import dynamic from 'next/dynamic'
 import BLOG from '@/blog.config'
-
-import Loading from '@/components/Loading'
-
-/**
- * 加载默认主题
- */
-const DefaultLayout = dynamic(() => import(`@/themes/${BLOG.THEME}/LayoutCategoryIndex`), { ssr: true })
+import { useRouter } from 'next/router'
+import { getLayoutByTheme } from '@/themes/theme'
+import { siteConfig } from '@/lib/config'
 
 /**
  * 分类首页
@@ -17,35 +12,26 @@ const DefaultLayout = dynamic(() => import(`@/themes/${BLOG.THEME}/LayoutCategor
  * @returns
  */
 export default function Category(props) {
-  const { theme } = useGlobal()
   const { locale } = useGlobal()
   const { siteInfo } = props
-  const [Layout, setLayout] = useState(DefaultLayout)
 
-  // 切换主题
-  useEffect(() => {
-    const loadLayout = async () => {
-      setLayout(dynamic(() => import(`@/themes/${theme}/LayoutCategoryIndex`)))
-    }
-    loadLayout()
-  }, [theme])
+  // 根据页面路径加载不同Layout文件
+  const Layout = getLayoutByTheme({ theme: siteConfig('THEME'), router: useRouter() })
 
   const meta = {
-    title: `${locale.COMMON.CATEGORY} | ${siteInfo?.title}`,
-    description: siteInfo?.description,
+    title: `${locale.COMMON.CATEGORY} | ${siteConfig('TITLE')}`,
+    description: siteConfig('DESCRIPTION'),
     image: siteInfo?.pageCover,
     slug: 'category',
     type: 'website'
   }
   props = { ...props, meta }
 
-  return <Suspense fallback={<Loading/>}>
-    <Layout {...props} />
-  </Suspense>
+  return <Layout {...props} />
 }
 
 export async function getStaticProps() {
-  const props = await getGlobalNotionData({ from: 'category-index-props' })
+  const props = await getGlobalData({ from: 'category-index-props' })
   delete props.allPages
   return {
     props,
