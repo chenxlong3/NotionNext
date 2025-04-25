@@ -37,15 +37,15 @@ module.exports = {
   // 衬线字体 例如'"LXGW WenKai"'
   FONT_SERIF: [
     // '"LXGW WenKai"',
-    'Bitter',
-    '"Noto Serif SC"',
-    'SimSun',
+    // 'Bitter',
+    // '"Noto Serif SC"',
+    // 'SimSun',
     '"Times New Roman"',
-    'Times',
-    'serif',
-    '"Segoe UI Emoji"',
-    '"Segoe UI Symbol"',
-    '"Apple Color Emoji"'
+    // 'Times',
+    // 'serif',
+    // '"Segoe UI Emoji"',
+    // '"Segoe UI Symbol"',
+    // '"Apple Color Emoji"'
   ],
   FONT_AWESOME:
     process.env.NEXT_PUBLIC_FONT_AWESOME_PATH ||
